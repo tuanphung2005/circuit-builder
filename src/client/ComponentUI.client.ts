@@ -15,33 +15,6 @@ const componentList = components.GetChildren();
 
 // print("Components found:", componentList);
 
-let currentPreview: Model | undefined;
-let isPlacing = false;
-
-function updatePreview() {
-    if (!currentPreview || !isPlacing) return;
-
-    const hit = mouse.Hit;
-    if (hit) {
-        // snap to grid
-    }
-}
-
-function createPreview(component: Instance) : Model {
-    const preview = component.Clone() as Model;
-    preview.Name = "Preview_" + component.Name;
-    preview.Parent = workspace;
-
-    for (const part of preview.GetDescendants()) {
-        if (part.IsA("BasePart")) {
-            part.Transparency = 0.5;
-            part.CanCollide = false;
-            part.Anchored = true;
-        }
-    }
-    return preview;
-}
-
 
 for (const component of componentList) {
     // create a button for each component
@@ -54,6 +27,6 @@ for (const component of componentList) {
     // connect the button click event
     button.MouseButton1Click.Connect(() => {
         // when clicked, show the grid, and preview the component placement, user can click again to confirm placement
-        
+        print("Previewing component:", component.Name);
     });
 }
