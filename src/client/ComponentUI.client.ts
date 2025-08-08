@@ -41,10 +41,13 @@ function destroyPreview() {
     }
 }
 
-function placeComponent(component: Model) {
-    const placedComponent = component.Clone() as Model;
-    placedComponent.Parent = workspace;
-    placedComponent.PivotTo(new CFrame(mouse.Hit.Position.add(offset)));
+function placeComponent(preview: Model) {
+    // Solidify the preview instead of cloning it
+    const parts = preview.GetDescendants().filter((p): p is BasePart => p.IsA("BasePart"));
+    for (const part of parts) {
+        part.Transparency = 0;
+        part.CanCollide = true;
+    }
 }
 
 for (const component of componentList) {
@@ -75,6 +78,13 @@ for (const component of componentList) {
         const previewComponent = (component as Model).Clone();
         previewComponent.Name = "Preview_" + component.Name;
         previewComponent.Parent = workspace;
+
+        const previewParts = previewComponent.GetDescendants().filter((p): p is BasePart => p.IsA("BasePart"));
+        for (const part of previewParts) {
+            part.Transparency = 0.5;
+            part.CanCollide = false;
+        }
+
         currentPreview = previewComponent;
         
         // update preview position with offset
@@ -89,10 +99,14 @@ for (const component of componentList) {
 mouse.Button1Down.Connect(() => {
     if (!isPlacing || !currentPreview) return;
 
+    // finalize the current preview in-place
+    placeComponent(currentPreview);
+
     isPlacing = false;
     previewConn?.Disconnect();
     previewConn = undefined;
 
+    // rename to the real component name
     currentPreview.Name = selectedComponent ? selectedComponent.Name : currentPreview.Name;
 
     currentPreview = undefined;
