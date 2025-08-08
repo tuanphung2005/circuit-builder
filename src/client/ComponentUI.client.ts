@@ -3,6 +3,10 @@ const workspace = game.GetService("Workspace");
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
 const RunService = game.GetService("RunService");
 
+// CONFIG
+// up 1 stud because im stupid
+const offset = new Vector3(0, 1, 0);
+
 const player = Players.LocalPlayer;
 const playerGui = player.WaitForChild("PlayerGui");
 
@@ -28,7 +32,7 @@ function destroyPreview() {
             return result !== undefined && result[0] === 1;
     });
     for (const preview of previews) {
-        print(" DEBUG destroying preview:", preview.Name);
+        // print(" DEBUG destroying preview:", preview.Name);
         preview.Destroy();
     }
 }
@@ -50,7 +54,7 @@ for (const component of componentList) {
         }
 
         // when clicked, show the grid, and preview the component placement, user can click again to confirm placement
-        print(" DEBUG previewing component:", component.Name);
+        // print(" DEBUG previewing component:", component.Name);
         isPlacing = true;
 
         // show preview
@@ -59,7 +63,7 @@ for (const component of componentList) {
         previewComponent.Parent = workspace;
         
         RunService.Heartbeat.Connect(() => {
-            const mousePos = mouse.Hit.Position;
+            const mousePos = mouse.Hit.Position.add(offset);
             // place preview at mouse position
             previewComponent.PivotTo(new CFrame(mousePos));
         })
@@ -72,7 +76,7 @@ UserInputService.InputBegan.Connect((input) => {
     if (input.KeyCode === Enum.KeyCode.Q) {
         if (isPlacing) {
             isPlacing = false;
-            print(" DEBUG placement cancelled");
+            // print(" DEBUG placement cancelled");
             destroyPreview();
         }
         
