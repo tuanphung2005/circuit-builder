@@ -10,7 +10,7 @@ const UserInputService = game.GetService("UserInputService");
 const player = Players.LocalPlayer;
 const playerGui = player.WaitForChild("PlayerGui");
 const ComponentUI = playerGui.WaitForChild("ComponentUI");
-const frame = ComponentUI.WaitForChild("Frame") as Frame;
+const frame = ComponentUI.WaitForChild("Frame") as ScrollingFrame;
 
 const componentsFolder = ReplicatedStorage.WaitForChild("Components") as Folder;
 const repo = new ComponentRepository(componentsFolder);
@@ -63,7 +63,8 @@ function initUI() {
 		const button = new Instance("TextButton");
 		button.Name = component.Name;
 		button.Text = component.Name;
-		button.Size = new UDim2(1, 0, 0, 50);
+		// uigridlayout handled this
+		// button.Size = new UDim2(1, 0, 0, 50); 
 		button.Parent = frame;
 		button.MouseButton1Click.Connect(() => startPlacing(component as Model));
 	}
