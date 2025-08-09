@@ -1,8 +1,10 @@
-import { PlacementOffset } from "shared/config";
+import { PlacementOffset, GridSize } from "shared/config";
+import { GridVisualizationService } from "client/services/GridVisualizationService";
 
 export class PreviewService {
 	private connection?: RBXScriptConnection;
 	private currentPreview?: Model;
+	private gridVis = new GridVisualizationService();
 
 	createPreview(model: Model, parent: Instance): Model {
 		const preview = model.Clone();
@@ -22,15 +24,41 @@ export class PreviewService {
 
 	startUpdating(preview: Model, mouse: PlayerMouse, runService = game.GetService("RunService")) {
 		this.stopUpdating();
+		// cache bounding box
+		const [, size] = preview.GetBoundingBox();
+		const halfHeight = size.Y / 2;
+		const workspace = game.GetService("Workspace");
+		const rayParams = new RaycastParams();
+		rayParams.FilterType = Enum.RaycastFilterType.Exclude;
+		rayParams.FilterDescendantsInstances = [preview];
+
+		// enable grid visual
+		this.gridVis.enable();
+
 		this.connection = runService.Heartbeat.Connect(() => {
-			const mousePos = mouse.Hit.Position.add(PlacementOffset);
-			preview.PivotTo(new CFrame(mousePos));
+			const aim = mouse.Hit.Position;
+			// snap horizontally
+			const snappedX = math.round(aim.X / GridSize) * GridSize;
+			const snappedZ = math.round(aim.Z / GridSize) * GridSize;
+
+			// raycast
+			const origin = new Vector3(snappedX, aim.Y + 500, snappedZ);
+			const direction = new Vector3(0, -2000, 0);
+			const result = workspace.Raycast(origin, direction, rayParams);
+			let baseY = aim.Y; // fallback
+			if (result) baseY = result.Position.Y;
+
+			const finalY = baseY + halfHeight + PlacementOffset.Y;
+			const finalPos = new Vector3(snappedX, finalY, snappedZ);
+			preview.PivotTo(new CFrame(finalPos));
+			this.gridVis.update(finalPos);
 		});
 	}
 
 	stopUpdating() {
 		this.connection?.Disconnect();
 		this.connection = undefined;
+		this.gridVis.disable();
 	}
 
 	solidify(preview: Model) {
