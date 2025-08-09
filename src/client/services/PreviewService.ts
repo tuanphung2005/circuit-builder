@@ -1,4 +1,4 @@
-import { PlacementOffset } from "shared/config";
+import { PlacementOffset, GridSize } from "shared/config";
 
 export class PreviewService {
 	private connection?: RBXScriptConnection;
@@ -22,9 +22,30 @@ export class PreviewService {
 
 	startUpdating(preview: Model, mouse: PlayerMouse, runService = game.GetService("RunService")) {
 		this.stopUpdating();
+		// cache bounding box
+		const [, size] = preview.GetBoundingBox();
+		const halfHeight = size.Y / 2;
+		const workspace = game.GetService("Workspace");
+		const rayParams = new RaycastParams();
+		rayParams.FilterType = Enum.RaycastFilterType.Exclude;
+		rayParams.FilterDescendantsInstances = [preview];
+
 		this.connection = runService.Heartbeat.Connect(() => {
-			const mousePos = mouse.Hit.Position.add(PlacementOffset);
-			preview.PivotTo(new CFrame(mousePos));
+			const aim = mouse.Hit.Position;
+			// snap horizontally
+			const snappedX = math.round(aim.X / GridSize) * GridSize;
+			const snappedZ = math.round(aim.Z / GridSize) * GridSize;
+
+			// raycast downward to support stacking
+			const origin = new Vector3(snappedX, aim.Y + 500, snappedZ);
+			const direction = new Vector3(0, -2000, 0);
+			const result = workspace.Raycast(origin, direction, rayParams);
+			let baseY = aim.Y; // fallback
+			if (result) baseY = result.Position.Y;
+
+			const finalY = baseY + halfHeight + PlacementOffset.Y;
+			const finalPos = new Vector3(snappedX, finalY, snappedZ);
+			preview.PivotTo(new CFrame(finalPos));
 		});
 	}
 

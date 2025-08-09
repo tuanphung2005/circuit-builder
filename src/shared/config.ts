@@ -1,1 +1,2 @@
-export const PlacementOffset = new Vector3(0, 1, 0); // up 1 stud
+export const PlacementOffset = new Vector3(0, 0, 0);
+export const GridSize = 4;
