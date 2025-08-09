@@ -1,6 +1,6 @@
 import { PlacementOffset } from "shared/config";
 import { ComponentRepository } from "client/services/ComponentRepository";
-import { PreviewService } from "client/services/PreviewService";
+import { PreviewService } from "client/components/placement/PreviewService";
 import { ComponentBinder } from "client/components/ComponentBinder";
 
 const Players = game.GetService("Players");
