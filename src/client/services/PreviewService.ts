@@ -1,8 +1,10 @@
 import { PlacementOffset, GridSize } from "shared/config";
+import { GridVisualizationService } from "client/services/GridVisualizationService";
 
 export class PreviewService {
 	private connection?: RBXScriptConnection;
 	private currentPreview?: Model;
+	private gridVis = new GridVisualizationService();
 
 	createPreview(model: Model, parent: Instance): Model {
 		const preview = model.Clone();
@@ -30,13 +32,16 @@ export class PreviewService {
 		rayParams.FilterType = Enum.RaycastFilterType.Exclude;
 		rayParams.FilterDescendantsInstances = [preview];
 
+		// enable grid visual
+		this.gridVis.enable();
+
 		this.connection = runService.Heartbeat.Connect(() => {
 			const aim = mouse.Hit.Position;
 			// snap horizontally
 			const snappedX = math.round(aim.X / GridSize) * GridSize;
 			const snappedZ = math.round(aim.Z / GridSize) * GridSize;
 
-			// raycast downward to support stacking
+			// raycast
 			const origin = new Vector3(snappedX, aim.Y + 500, snappedZ);
 			const direction = new Vector3(0, -2000, 0);
 			const result = workspace.Raycast(origin, direction, rayParams);
@@ -46,12 +51,14 @@ export class PreviewService {
 			const finalY = baseY + halfHeight + PlacementOffset.Y;
 			const finalPos = new Vector3(snappedX, finalY, snappedZ);
 			preview.PivotTo(new CFrame(finalPos));
+			this.gridVis.update(finalPos);
 		});
 	}
 
 	stopUpdating() {
 		this.connection?.Disconnect();
 		this.connection = undefined;
+		this.gridVis.disable();
 	}
 
 	solidify(preview: Model) {
