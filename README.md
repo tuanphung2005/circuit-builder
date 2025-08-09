@@ -1,11 +1,11 @@
 # CIRCUIT MAKER
 
 ## STRUCTURE OF COMPONENT(s) (Model):
-BUTTON { Highlight(Highlight), ClickDetector(clickdetector), Base(part), Out(part) }
+Button { Highlight(Highlight), ClickDetector(clickdetector), Base(part), Out(part) }
 
-SWITCH { Highlight(Highlight), ClickDetector(clickdetector), Base(part), Out(part) }
+Switch { Highlight(Highlight), ClickDetector(clickdetector), Base(part), Out(part) }
 
-AND { In1(part), In2(part), Base(part), Out(part) }
+And { In1(part), In2(part), Base(part), Out(part) }
 - change hightlight outline transparency to 0 when button/switch is activated
 
 ## how do we do this?

@@ -1,6 +1,7 @@
 import { PlacementOffset } from "shared/config";
 import { ComponentRepository } from "client/services/ComponentRepository";
 import { PreviewService } from "client/services/PreviewService";
+import { ComponentBinder } from "client/components/ComponentBinder";
 
 const Players = game.GetService("Players");
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
@@ -15,12 +16,24 @@ const frame = ComponentUI.WaitForChild("Frame") as ScrollingFrame;
 const componentsFolder = ReplicatedStorage.WaitForChild("Components") as Folder;
 const repo = new ComponentRepository(componentsFolder);
 const previewService = new PreviewService();
+const binder = new ComponentBinder();
+// Bind existing placed components if any (folder may persist across sessions)
+binder.bindDescendants(Workspace);
 
 let isPlacing = false;
 let currentPreview: Model | undefined;
 let selectedComponent: Model | undefined;
 
 const mouse = player.GetMouse();
+
+// Dedicated folder for placed components
+const COMPONENT_ROOT_NAME = "PlacedComponents";
+let componentRoot = Workspace.FindFirstChild(COMPONENT_ROOT_NAME) as Folder | undefined;
+if (!componentRoot) {
+	componentRoot = new Instance("Folder");
+	componentRoot.Name = COMPONENT_ROOT_NAME;
+	componentRoot.Parent = Workspace;
+}
 
 function startPlacing(component: Model) {
 	// cancel previous placement if any
@@ -45,6 +58,10 @@ function placeCurrent() {
 	isPlacing = false;
 	previewService.stopUpdating();
 	currentPreview.Name = selectedComponent ? selectedComponent.Name : currentPreview.Name;
+	// Reparent into dedicated component root
+	currentPreview.Parent = componentRoot;
+	// register component behavior(s)
+	binder.bind(currentPreview);
 	currentPreview = undefined;
 	selectedComponent = undefined;
 }
