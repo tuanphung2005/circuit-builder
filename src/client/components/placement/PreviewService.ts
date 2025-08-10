@@ -1,5 +1,5 @@
 import { PlacementOffset, GridSize } from "shared/config";
-import { GridVisualizationService } from "client/services/GridVisualizationService";
+import { GridVisualizationService } from "client/components/placement/GridVisualizationService";
 
 export class PreviewService {
 	private connection?: RBXScriptConnection;
