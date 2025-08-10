@@ -47,17 +47,35 @@ function enterDeleteMode() {
 	deleteMode = true;
 	if (isPlacing) cancelPlacement();
 	applyDeleteVisual();
-	// print("[Placement] Delete mode ON");
 }
 
 function exitDeleteMode() {
 	if (!deleteMode) return;
 	deleteMode = false;
 	applyDeleteVisual();
-	// print("[Placement] Delete mode OFF");
+	clearHover();
 }
 
 const mouse = player.GetMouse();
+const RunService = game.GetService("RunService");
+
+let hoverHighlight: Highlight | undefined;
+let hoverTarget: Model | undefined;
+function ensureHoverHighlight() {
+	if (!hoverHighlight) {
+		hoverHighlight = new Instance("Highlight");
+		hoverHighlight.Name = "DeleteHover";
+		hoverHighlight.FillTransparency = 1;
+		hoverHighlight.OutlineColor = new Color3(1, 0.2, 0.2);
+		hoverHighlight.OutlineTransparency = 0;
+		hoverHighlight.DepthMode = Enum.HighlightDepthMode.Occluded;
+		hoverHighlight.Parent = ComponentUI;
+	}
+}
+function clearHover() {
+	if (hoverHighlight) hoverHighlight.Adornee = undefined;
+	hoverTarget = undefined;
+}
 
 const COMPONENT_ROOT_NAME = "PlacedComponents";
 let componentRoot = Workspace.FindFirstChild(COMPONENT_ROOT_NAME) as Folder | undefined;
@@ -183,3 +201,24 @@ UserInputService.InputBegan.Connect((input) => {
 });
 
 initUI();
+
+// del TODO: REFACTOR THIS PIECE OF DELETE CODE THIS IS INSUFFERABLE
+RunService.Heartbeat.Connect(() => {
+	if (!deleteMode) { if (hoverTarget) clearHover(); return; }
+	const cam = Workspace.CurrentCamera; if (!cam) return;
+	const origin = cam.CFrame.Position;
+	const dir = mouse.Hit.Position.sub(origin).Unit.mul(500);
+	const params = new RaycastParams(); params.FilterType = Enum.RaycastFilterType.Include;
+	if (componentRoot) params.FilterDescendantsInstances = [componentRoot];
+	const result = Workspace.Raycast(origin, dir, params);
+	let newTarget: Model | undefined;
+	if (result && result.Instance) {
+		const model = result.Instance.FindFirstAncestorOfClass("Model");
+		if (model && model.Parent === componentRoot) newTarget = model;
+	}
+	if (newTarget !== hoverTarget) {
+		if (newTarget) ensureHoverHighlight();
+		if (hoverHighlight) hoverHighlight.Adornee = newTarget;
+		hoverTarget = newTarget;
+	}
+});
