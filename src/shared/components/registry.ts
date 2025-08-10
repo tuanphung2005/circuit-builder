@@ -6,6 +6,11 @@ export const ComponentRegistry: Record<string, ComponentMetadata> = {
 		displayName: "Button",
 		description: "A simple toggle button component.",
 	},
+	Light: {
+		kind: ComponentKind.Light,
+		displayName: "Light",
+		description: "A simple point light that toggles on click.",
+	},
 };
 
 export function getComponentMetadata(name: string): ComponentMetadata | undefined {
