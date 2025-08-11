@@ -1,4 +1,5 @@
 import { ComponentKind } from "shared/components/types";
+import { wireService } from "client/services/WireService";
 
 export function isButton(model: Model) {
 	return model.Name === ComponentKind.Button || model.Name === ComponentKind.Button.upper();
@@ -33,6 +34,7 @@ export function wireButton(model: Model) {
 		if (base && base.IsA("BasePart")) {
 			highlight.FillColor = base.Color;
 		}
+		wireService.notifyOutputChanged(model, active);
 	};
 	apply();
 	clickDetector.MouseClick.Connect(() => {

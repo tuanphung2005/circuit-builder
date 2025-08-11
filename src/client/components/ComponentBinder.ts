@@ -1,5 +1,13 @@
 import { wireButton, isButton } from "client/components/behaviors/ButtonBehavior";
 import { wireLight, isLight } from "client/components/behaviors/LightBehavior";
+import { wireAnd, isAnd } from "client/components/behaviors/AndBehavior";
+
+let nextComponentId = 1;
+function assignId(model: Model) {
+	if (model.GetAttribute("ComponentId") === undefined) {
+		model.SetAttribute("ComponentId", nextComponentId++);
+	}
+}
 
 export type BehaviorWireFn = (model: Model) => void;
 
@@ -15,10 +23,12 @@ export class ComponentBinder {
 	constructor() {
 		this.entries.push({ predicate: isButton, wire: wireButton });
 		this.entries.push({ predicate: isLight, wire: wireLight });
+		this.entries.push({ predicate: isAnd, wire: wireAnd });
 	}
 
 	bind(model: Model) {
 		if (this.wired.has(model)) return;
+		assignId(model);
 		for (const entry of this.entries) {
 			if (entry.predicate(model)) {
 				entry.wire(model);

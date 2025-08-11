@@ -18,10 +18,11 @@ export function wireLight(model: Model) {
 		light = point;
 	}
 
-	let on = (light as Light).Enabled;
 	const apply = () => {
-		(light as Light).Enabled = on;
-		model.SetAttribute("Active", on);
+		const powered = model.GetAttribute("Powered") === true || model.GetAttribute("Active") === true;
+		light.Enabled = powered;
 	};
 	apply();
+
+	model.GetAttributeChangedSignal("Powered").Connect(apply);
 }
