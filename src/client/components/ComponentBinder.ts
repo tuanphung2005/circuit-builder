@@ -1,5 +1,6 @@
 import { wireButton, isButton } from "client/components/behaviors/ButtonBehavior";
 import { wireLight, isLight } from "client/components/behaviors/LightBehavior";
+import { wireAnd, isAnd } from "client/components/behaviors/AndBehavior";
 
 export type BehaviorWireFn = (model: Model) => void;
 
@@ -15,6 +16,7 @@ export class ComponentBinder {
 	constructor() {
 		this.entries.push({ predicate: isButton, wire: wireButton });
 		this.entries.push({ predicate: isLight, wire: wireLight });
+		this.entries.push({ predicate: isAnd, wire: wireAnd });
 	}
 
 	bind(model: Model) {
