@@ -1,7 +1,7 @@
 import { wireService } from "client/services/WireService";
 import { WiringMode } from "client/controllers/modes/WiringMode";
 
-// CutWireMode: click an input or output endpoint to remove all wires attached to that endpoint.
+// CutWireMode: click any part of a component to remove all wires attached to that component.
 export class CutWireMode {
 	private active = false;
 	private componentRoot: Folder;
@@ -21,21 +21,18 @@ export class CutWireMode {
 
 	onClick(mouse: PlayerMouse, camera: Camera) {
 		if (!this.active) return;
-		const target = this.raycastEndpoint(mouse, camera);
-		if (target) {
-			const removed = wireService.removeConnectionsForEndpoint(target);
+		const model = this.raycastModel(mouse, camera);
+		if (model) {
+			const removed = wireService.removeConnectionsForComponent(model);
 			this.wiringMode.invalidateCache(removed);
 		}
 	}
 
 	onHeartbeat(mouse: PlayerMouse, camera: Camera) {
 		if (!this.active) { if (this.hoverPart) this.clearHover(); return; }
-		const endpoint = this.raycastEndpoint(mouse, camera);
-		if (endpoint !== this.hoverPart) {
-			if (endpoint) this.ensureHighlight();
-			if (this.hoverHighlight) this.hoverHighlight.Adornee = endpoint;
-			this.hoverPart = endpoint;
-		}
+		const model = this.raycastModel(mouse, camera);
+		const part = model ? (model.PrimaryPart || model.FindFirstChildWhichIsA("BasePart")) as BasePart | undefined : undefined;
+		if (part !== this.hoverPart) { if (part) this.ensureHighlight(); if (this.hoverHighlight) this.hoverHighlight.Adornee = model; this.hoverPart = part; }
 	}
 
 	private ensureHighlight() {
@@ -52,13 +49,13 @@ export class CutWireMode {
 	private clearHover() { if (this.hoverHighlight) this.hoverHighlight.Adornee = undefined; this.hoverPart = undefined; }
 
 	private isEndpoint(part: BasePart) { const n = part.Name; return n === "Out" || n === "In" || n.sub(1,2) === "In"; }
-	private raycastEndpoint(mouse: PlayerMouse, camera: Camera): BasePart | undefined {
+	private raycastModel(mouse: PlayerMouse, camera: Camera): Model | undefined {
 		const origin = camera.CFrame.Position; const dir = mouse.Hit.Position.sub(origin).Unit.mul(500);
 		const params = new RaycastParams(); params.FilterType = Enum.RaycastFilterType.Include; params.FilterDescendantsInstances = [this.componentRoot];
 		const result = game.GetService("Workspace").Raycast(origin, dir, params);
 		if (result && result.Instance) {
-			const part = result.Instance.FindFirstAncestorWhichIsA("BasePart");
-			if (part && this.isEndpoint(part)) return part;
+			const model = result.Instance.FindFirstAncestorOfClass("Model");
+			if (model && model.Parent === this.componentRoot) return model;
 		}
 		return undefined;
 	}
