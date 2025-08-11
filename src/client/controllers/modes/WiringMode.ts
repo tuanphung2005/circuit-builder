@@ -55,11 +55,28 @@ export class WiringMode {
 	}
 	private ensureAttachment(part: BasePart): Attachment { let a = part.FindFirstChild("WireAttachment") as Attachment; if (!a) { a = new Instance("Attachment"); a.Name = "WireAttachment"; a.Parent = part; } return a; }
 	private createWire(outPart: BasePart, inPart: BasePart) {
-		const key = `${outPart.GetFullName()}->${inPart.GetFullName()}`;
-		if (this.existingKeys.has(key)) return;
+		// Use the same key format as WireService (ComponentId-based) so identical component names don't collide.
+		const outModel = outPart.FindFirstAncestorOfClass("Model");
+		const inModel = inPart.FindFirstAncestorOfClass("Model");
+		if (!outModel || !inModel || outModel === inModel) return;
+		let outId = outModel.GetAttribute("ComponentId") as number | undefined;
+		let inId = inModel.GetAttribute("ComponentId") as number | undefined;
+		// Fallback: assign temporary ids if binder somehow missed (will also let WireService set one later)
+		if (outId === undefined) { outId = math.random(1, 10_000_000); outModel.SetAttribute("ComponentId", outId); }
+		if (inId === undefined) { inId = math.random(1, 10_000_000); inModel.SetAttribute("ComponentId", inId); }
+		const key = `${outId}:${outPart.Name}->${inId}:${inPart.Name}`;
+		if (this.existingKeys.has(key)) {
+			// debug: prevent silent refusal when user attempts duplicate
+			// print(`[WiringMode] Duplicate wire prevented: ${key}`);
+			return;
+		}
 		this.existingKeys.add(key);
 		const a0 = this.ensureAttachment(outPart); const a1 = this.ensureAttachment(inPart);
-		const beam = new Instance("Beam"); beam.Attachment0 = a0; beam.Attachment1 = a1; beam.Width0 = 0.1; beam.Width1 = 0.1; beam.Color = new ColorSequence(new Color3(0,1,1)); beam.Parent = this.wiresFolder;
+		const beam = new Instance("Beam");
+		beam.Attachment0 = a0; beam.Attachment1 = a1;
+		beam.Width0 = 0.1; beam.Width1 = 0.1;
+		beam.Color = new ColorSequence(new Color3(0,1,1));
+		beam.Parent = this.wiresFolder;
 		beam.Name = key;
 		wireService.addConnection(outPart, inPart, beam);
 	}

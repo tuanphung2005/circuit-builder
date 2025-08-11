@@ -11,18 +11,34 @@ export class WireService {
 	private connectionsByInputPart = new Map<BasePart, ConnectionRecord[]>();
 	private inputPartPowered = new Map<BasePart, boolean>();
 	private connections = new Map<string, ConnectionRecord>();
+	private idCounter = 1000; // fallback id allocator if binder missed
+	private readonly ACTIVE_WIDTH = 0.2;
+	private readonly INACTIVE_WIDTH = 0.1;
+
+	private ensureModelId(model: Model): number {
+		let id = model.GetAttribute("ComponentId") as number | undefined;
+		if (id === undefined) {
+			id = this.idCounter++;
+			model.SetAttribute("ComponentId", id);
+		}
+		return id;
+	}
 
 	addConnection(outputPart: BasePart, inputPart: BasePart, beam: Beam) {
 		const outModel = outputPart.FindFirstAncestorOfClass("Model");
 		const inModel = inputPart.FindFirstAncestorOfClass("Model");
 		if (!outModel || !inModel || outModel === inModel) return;
-		const key = `${outputPart.GetFullName()}->${inputPart.GetFullName()}`;
+		const outId = this.ensureModelId(outModel);
+		const inId = this.ensureModelId(inModel);
+		const key = `${outId}:${outputPart.Name}->${inId}:${inputPart.Name}`;
 		if (this.connections.has(key)) return; // already exists
 		const record: ConnectionRecord = { outputPart, inputPart, beam, key };
 		this.connections.set(key, record);
 		const list = this.connectionsByOutput.get(outModel) || []; list.push(record); this.connectionsByOutput.set(outModel, list);
 		const listIn = this.connectionsByInputPart.get(inputPart) || []; listIn.push(record); this.connectionsByInputPart.set(inputPart, listIn);
 		const active = this.outputState.get(outModel) ?? false;
+		// initialize beam visual + input power if active
+		this.applyBeamVisual(record.beam, active);
 		if (active) this.setInputPartPowered(inputPart, true);
 		this.evaluateModel(inModel);
 	}
@@ -96,12 +112,20 @@ export class WireService {
 		const records = this.connectionsByOutput.get(outModel);
 		if (records) {
 			for (const rec of records) {
+				this.applyBeamVisual(rec.beam, active);
 				this.setInputPartPowered(rec.inputPart, active || this.inputPartPowered.get(rec.inputPart) === true);
 				if (!active) this.recomputeInputPart(rec.inputPart);
 				const inModel = rec.inputPart.FindFirstAncestorOfClass("Model");
 				if (inModel) this.evaluateModel(inModel);
 			}
 		}
+	}
+
+	private applyBeamVisual(beam: Beam, powered: boolean) {
+		beam.Width0 = powered ? this.ACTIVE_WIDTH : this.INACTIVE_WIDTH;
+		beam.Width1 = powered ? this.ACTIVE_WIDTH : this.INACTIVE_WIDTH;
+		beam.Color = powered ? new ColorSequence(new Color3(0,1,0.3)) : new ColorSequence(new Color3(0,1,1));
+		beam.Transparency = powered ? new NumberSequence(0) : new NumberSequence(0.15);
 	}
 
 	private recomputeInputPart(inputPart: BasePart) {

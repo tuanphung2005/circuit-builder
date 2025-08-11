@@ -2,6 +2,14 @@ import { wireButton, isButton } from "client/components/behaviors/ButtonBehavior
 import { wireLight, isLight } from "client/components/behaviors/LightBehavior";
 import { wireAnd, isAnd } from "client/components/behaviors/AndBehavior";
 
+// simple incremental id generator
+let nextComponentId = 1;
+function assignId(model: Model) {
+	if (model.GetAttribute("ComponentId") === undefined) {
+		model.SetAttribute("ComponentId", nextComponentId++);
+	}
+}
+
 export type BehaviorWireFn = (model: Model) => void;
 
 interface BehaviorEntry {
@@ -21,6 +29,7 @@ export class ComponentBinder {
 
 	bind(model: Model) {
 		if (this.wired.has(model)) return;
+		assignId(model);
 		for (const entry of this.entries) {
 			if (entry.predicate(model)) {
 				entry.wire(model);
