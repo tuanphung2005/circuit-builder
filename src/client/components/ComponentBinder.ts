@@ -2,7 +2,6 @@ import { wireButton, isButton } from "client/components/behaviors/ButtonBehavior
 import { wireLight, isLight } from "client/components/behaviors/LightBehavior";
 import { wireAnd, isAnd } from "client/components/behaviors/AndBehavior";
 
-// simple incremental id generator
 let nextComponentId = 1;
 function assignId(model: Model) {
 	if (model.GetAttribute("ComponentId") === undefined) {

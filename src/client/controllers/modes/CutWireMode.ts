@@ -1,12 +1,11 @@
 import { wireService } from "client/services/WireService";
 import { WiringMode } from "client/controllers/modes/WiringMode";
 
-// CutWireMode: click any part of a component to remove all wires attached to that component.
 export class CutWireMode {
 	private active = false;
 	private componentRoot: Folder;
 	private uiParent: Instance;
-	private wiringMode: WiringMode; // to invalidate cache
+	private wiringMode: WiringMode;
 	private hoverHighlight?: Highlight;
 	private hoverPart?: BasePart;
 
