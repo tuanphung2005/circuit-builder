@@ -9,18 +9,13 @@ export function wireLight(model: Model) {
 	const base = model.PrimaryPart || (model.FindFirstChildWhichIsA("BasePart") as BasePart | undefined);
 	if (!base) return;
 
-	let light = base.FindFirstChildWhichIsA("PointLight") as PointLight;
-	if (!light) {
-		const point = new Instance("PointLight");
-		point.Enabled = false;
-		point.Brightness = 10;
-		point.Parent = base;
-		light = point;
-	}
+	const lightPart = model.WaitForChild("Light") as Part;
+	const light = lightPart.FindFirstChildWhichIsA("PointLight") as PointLight;
 
 	const apply = () => {
 		const powered = model.GetAttribute("Powered") === true || model.GetAttribute("Active") === true;
-		light.Enabled = powered;
+		light.Brightness = powered ? 10 : 0;
+		lightPart.Material = powered ? Enum.Material.Neon : Enum.Material.Plastic;
 	};
 	apply();
 

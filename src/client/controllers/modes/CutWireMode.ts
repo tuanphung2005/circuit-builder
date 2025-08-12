@@ -40,7 +40,7 @@ export class CutWireMode {
 			h.Name = "CutWireHover";
 			h.FillTransparency = 1;
 			h.OutlineTransparency = 0;
-			h.OutlineColor = new Color3(1, 0.6, 0); // orange
+			h.OutlineColor = new Color3(1, 0.6, 0);
 			h.Parent = this.uiParent;
 			this.hoverHighlight = h;
 		}
