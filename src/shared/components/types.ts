@@ -2,7 +2,7 @@ export enum ComponentKind {
 	Button = "Button",
 	Light = "Light",
 	And = "And",
-	// Future: Switch = "Switch", Gate = "Gate" etc.
+	Not = "Not",
 }
 
 export interface ComponentMetadata {

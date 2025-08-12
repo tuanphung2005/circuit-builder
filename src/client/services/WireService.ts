@@ -145,11 +145,21 @@ export class WireService {
 		const inputParts = model.GetChildren().filter(c => c.IsA("BasePart") && (c.Name === "In" || c.Name.sub(1,2) === "In")) as BasePart[];
 		if (inputParts.size() === 0) return; // no inputs => treat as source handled elsewhere
 		let powered: boolean;
-		if (nameLower === "and") powered = inputParts.every(p => this.inputPartPowered.get(p) === true); else powered = inputParts.some(p => this.inputPartPowered.get(p) === true);
+		if (nameLower === "and") {
+			powered = inputParts.every(p => this.inputPartPowered.get(p) === true);
+		} else {
+			powered = inputParts.some(p => this.inputPartPowered.get(p) === true);
+		}
+
 		const prev = model.GetAttribute("Powered");
-		if (prev !== powered) model.SetAttribute("Powered", powered);
-		// Propagate this model's output state to its connected outputs (if it has an Out part wired)
-		this.notifyOutputChanged(model, powered);
+		if (prev !== powered) {
+			model.SetAttribute("Powered", powered);
+		}
+		let outputPowered = powered;
+		if (nameLower === "not") {
+			outputPowered = !powered;
+		}
+		this.notifyOutputChanged(model, outputPowered);
 	}
 }
 

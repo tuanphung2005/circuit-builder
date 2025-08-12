@@ -16,6 +16,11 @@ export const ComponentRegistry: Record<string, ComponentMetadata> = {
 		displayName: "And",
 		description: "Outputs power only when all inputs are powered.",
 	},
+	Not: {
+		kind: ComponentKind.Not,
+		displayName: "Not",
+		description: "Outputs power only when the input is not powered.",
+	}
 };
 
 export function getComponentMetadata(name: string): ComponentMetadata | undefined {
