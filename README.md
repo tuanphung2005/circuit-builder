@@ -1,5 +1,10 @@
 # CIRCUIT MAKER
 
+## NOTE TO SELF:
+to add a component, i need to update registry, types, wireservice, componentbinder, and component behaviour
+
+MORE NOTE: REWORK WIRESERVICE
+
 ## STRUCTURE OF COMPONENT(s) (Model):
 Button { Highlight(Highlight), ClickDetector(clickdetector), Base(part), Out(part) }
 - change hightlight outline transparency to 0 when button/switch is activated
