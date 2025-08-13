@@ -20,6 +20,11 @@ export const ComponentRegistry: Record<string, ComponentMetadata> = {
 		kind: ComponentKind.Not,
 		displayName: "Not",
 		description: "Outputs power only when the input is not powered.",
+	},
+	Switch: {
+		kind: ComponentKind.Switch,
+		displayName: "Switch",
+		description: "A simple switch component that toggles power.",
 	}
 };
 

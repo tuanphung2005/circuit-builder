@@ -1,7 +1,7 @@
 import { ComponentRepository } from "client/services/ComponentRepository";
 import { PreviewService } from "client/components/placement/PreviewService";
 import { ComponentBinder } from "client/components/ComponentBinder";
-import { wireService } from "client/services/WireService"; // ensure imported for side effects
+import { wireService } from "client/services/WireService";
 import { PlacementMode } from "client/controllers/modes/PlacementMode";
 import { DeleteMode } from "client/controllers/modes/DeleteMode";
 import { WiringMode } from "client/controllers/modes/WiringMode";
@@ -68,7 +68,12 @@ function syncWireButton() {
 	wireButtonRef.Text = active ? "Exit Wiring" : "Wire";
 	wireButtonRef.BackgroundColor3 = active ? new Color3(0,0.3,0.6) : new Color3(0.15,0.15,0.15);
 }
-function syncCutButton() { if (!cutWireButtonRef) return; const active = cutWireMode.isActive(); cutWireButtonRef.Text = active ? "Exit Cut" : "CutWire"; cutWireButtonRef.BackgroundColor3 = active ? new Color3(0.6,0.3,0) : new Color3(0.15,0.15,0.15); }
+function syncCutButton() { 
+	if (!cutWireButtonRef) return; 
+	const active = cutWireMode.isActive(); 
+	cutWireButtonRef.Text = active ? "Exit Cut" : "CutWire"; 
+	cutWireButtonRef.BackgroundColor3 = active ? new Color3(0.6,0.3,0) : new Color3(0.15,0.15,0.15);
+}
 function syncMoveButton() {
 	if (!moveButtonRef) return;
 	const active = moveMode.isActive();
@@ -111,7 +116,7 @@ function activateMove() {
 	updateIndicator();
 }
 function startPlacing(component: Model) {
-	if (deleteMode.isActive() || wiringMode.isActive() || cutWireMode.isActive() || moveMode.isActive()) return;
+	exitAllModes();
 	placementMode.start(component);
 	updateIndicator();
 }
