@@ -68,7 +68,12 @@ function syncWireButton() {
 	wireButtonRef.Text = active ? "Exit Wiring" : "Wire";
 	wireButtonRef.BackgroundColor3 = active ? new Color3(0,0.3,0.6) : new Color3(0.15,0.15,0.15);
 }
-function syncCutButton() { if (!cutWireButtonRef) return; const active = cutWireMode.isActive(); cutWireButtonRef.Text = active ? "Exit Cut" : "CutWire"; cutWireButtonRef.BackgroundColor3 = active ? new Color3(0.6,0.3,0) : new Color3(0.15,0.15,0.15); }
+function syncCutButton() { 
+	if (!cutWireButtonRef) return; 
+	const active = cutWireMode.isActive(); 
+	cutWireButtonRef.Text = active ? "Exit Cut" : "CutWire"; 
+	cutWireButtonRef.BackgroundColor3 = active ? new Color3(0.6,0.3,0) : new Color3(0.15,0.15,0.15);
+}
 function syncMoveButton() {
 	if (!moveButtonRef) return;
 	const active = moveMode.isActive();
