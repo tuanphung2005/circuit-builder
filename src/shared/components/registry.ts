@@ -9,7 +9,7 @@ export const ComponentRegistry: Record<string, ComponentMetadata> = {
 	Light: {
 		kind: ComponentKind.Light,
 		displayName: "Light",
-		description: "A simple point light that toggles on click.",
+		description: "A simple point light that lit upon being powered",
 	},
 	And: {
 		kind: ComponentKind.And,
