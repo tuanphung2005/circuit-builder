@@ -116,7 +116,7 @@ function activateMove() {
 	updateIndicator();
 }
 function startPlacing(component: Model) {
-	if (deleteMode.isActive() || wiringMode.isActive() || cutWireMode.isActive() || moveMode.isActive()) return;
+	exitAllModes();
 	placementMode.start(component);
 	updateIndicator();
 }
