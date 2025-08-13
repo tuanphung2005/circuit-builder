@@ -40,6 +40,9 @@ export function wireButton(model: Model) {
 	clickDetector.MouseClick.Connect(() => {
 		active = !active;
 		apply();
+		let baseDist = clickDetector.MaxActivationDistance;
+		clickDetector.MaxActivationDistance = active ? baseDist : 0;
 		// print(` DEBUG activated ${model.Name} -> ${active}`);
+		task.wait(1);
 	});
 }
