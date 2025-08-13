@@ -9,13 +9,18 @@ export const ComponentRegistry: Record<string, ComponentMetadata> = {
 	Light: {
 		kind: ComponentKind.Light,
 		displayName: "Light",
-		description: "A simple point light that toggles on click.",
+		description: "A simple point light that lit upon being powered",
 	},
 	And: {
 		kind: ComponentKind.And,
 		displayName: "And",
 		description: "Outputs power only when all inputs are powered.",
 	},
+	Not: {
+		kind: ComponentKind.Not,
+		displayName: "Not",
+		description: "Outputs power only when the input is not powered.",
+	}
 };
 
 export function getComponentMetadata(name: string): ComponentMetadata | undefined {
