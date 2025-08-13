@@ -7,6 +7,7 @@ import { DeleteMode } from "client/controllers/modes/DeleteMode";
 import { WiringMode } from "client/controllers/modes/WiringMode";
 import { CutWireMode } from "client/controllers/modes/CutWireMode";
 import { MoveMode } from "client/controllers/modes/MoveMode";
+import { ClickDetectorManager } from "client/services/ClickDetectorManager";
 
 const Players = game.GetService("Players");
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
@@ -34,6 +35,8 @@ const binder = new ComponentBinder();
 const COMPONENT_ROOT_NAME = "PlacedComponents";
 let componentRoot = Workspace.FindFirstChild(COMPONENT_ROOT_NAME) as Folder | undefined;
 if (!componentRoot) { componentRoot = new Instance("Folder"); componentRoot.Name = COMPONENT_ROOT_NAME; componentRoot.Parent = Workspace; }
+
+const clickDetectorManager = new ClickDetectorManager(componentRoot);
 
 binder.bindDescendants(Workspace);
 
@@ -87,30 +90,33 @@ function exitAllModes() {
 	wiringMode.exit();
 	cutWireMode.exit();
 	moveMode.exit();
+	clickDetectorManager.enableAll();
 	syncDeleteButton(); syncWireButton(); syncCutButton(); syncMoveButton(); updateIndicator();
 }
 
 function activateDelete() {
-	if (deleteMode.isActive()) { deleteMode.exit(); }
-	else { exitAllModes(); deleteMode.enter(); }
+	if (deleteMode.isActive()) { deleteMode.exit(); clickDetectorManager.enableAll(); }
+	else { exitAllModes(); deleteMode.enter(); clickDetectorManager.disableAll(); }
 	syncDeleteButton(); updateIndicator();
 }
 function activateWiring() {
-	if (wiringMode.isActive()) { wiringMode.exit(); }
-	else { exitAllModes(); wiringMode.enter(); }
+	if (wiringMode.isActive()) { wiringMode.exit(); clickDetectorManager.enableAll(); }
+	else { exitAllModes(); wiringMode.enter(); clickDetectorManager.disableAll(); }
 	syncWireButton(); updateIndicator();
 }
 function activateCut() {
-	if (cutWireMode.isActive()) cutWireMode.exit();
-	else { exitAllModes(); cutWireMode.enter(); }
+	if (cutWireMode.isActive()) { cutWireMode.exit(); clickDetectorManager.enableAll(); }
+	else { exitAllModes(); cutWireMode.enter(); clickDetectorManager.disableAll(); }
 	syncCutButton(); updateIndicator();
 }
 function activateMove() {
 	if (moveMode.isActive()) {
 		moveMode.exit();
+		clickDetectorManager.enableAll();
 	} else {
 		exitAllModes();
 		moveMode.enter();
+		clickDetectorManager.disableAll();
 	}
 	syncMoveButton();
 	updateIndicator();
@@ -166,7 +172,11 @@ mouse.Button1Down.Connect(() => {
 });
 UserInputService.InputBegan.Connect((input) => {
 	if (input.KeyCode === Enum.KeyCode.Q) {
-		if (deleteMode.isActive() || wiringMode.isActive() || moveMode.isActive()) exitAllModes(); else placementMode.cancel();
+		if (deleteMode.isActive() || wiringMode.isActive() || moveMode.isActive()) {
+			exitAllModes();
+		} else {
+			placementMode.cancel();
+		}
 		updateIndicator(); syncDeleteButton(); syncWireButton();
 	}
 	if (input.KeyCode === Enum.KeyCode.Escape) { exitAllModes(); }
