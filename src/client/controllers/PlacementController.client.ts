@@ -6,6 +6,7 @@ import { PlacementMode } from "client/controllers/modes/PlacementMode";
 import { DeleteMode } from "client/controllers/modes/DeleteMode";
 import { WiringMode } from "client/controllers/modes/WiringMode";
 import { CutWireMode } from "client/controllers/modes/CutWireMode";
+import { MoveMode } from "client/controllers/modes/MoveMode";
 
 const Players = game.GetService("Players");
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
@@ -22,6 +23,7 @@ let modeIndicator: TextLabel | undefined;
 let deleteButtonRef: TextButton | undefined;
 let wireButtonRef: TextButton | undefined;
 let cutWireButtonRef: TextButton | undefined;
+let moveButtonRef: TextButton | undefined;
 
 // Roots & services
 const componentsFolder = ReplicatedStorage.WaitForChild("Components") as Folder;
@@ -42,6 +44,7 @@ const placementMode = new PlacementMode(previewService, binder, componentRoot, m
 const deleteMode = new DeleteMode(componentRoot, ComponentUI);
 const wiringMode = new WiringMode(componentRoot, ComponentUI);
 const cutWireMode = new CutWireMode(componentRoot, ComponentUI, wiringMode);
+const moveMode = new MoveMode(componentRoot, previewService, mouse);
 
 // UI helpers
 function updateIndicator() {
@@ -50,6 +53,7 @@ function updateIndicator() {
 	if (cutWireMode.isActive()) { modeIndicator.Text = "CUT MODE"; modeIndicator.Visible = true; return; }
 	if (wiringMode.isActive()) { modeIndicator.Text = "WIRING MODE"; modeIndicator.Visible = true; return; }
 	if (placementMode.isActive()) { modeIndicator.Text = "PLACING"; modeIndicator.Visible = true; return; }
+	if (moveMode.isActive()) { modeIndicator.Text = "MOVING"; modeIndicator.Visible = true; return; }
 	modeIndicator.Visible = false;
 }
 function syncDeleteButton() {
@@ -65,13 +69,20 @@ function syncWireButton() {
 	wireButtonRef.BackgroundColor3 = active ? new Color3(0,0.3,0.6) : new Color3(0.15,0.15,0.15);
 }
 function syncCutButton() { if (!cutWireButtonRef) return; const active = cutWireMode.isActive(); cutWireButtonRef.Text = active ? "Exit Cut" : "CutWire"; cutWireButtonRef.BackgroundColor3 = active ? new Color3(0.6,0.3,0) : new Color3(0.15,0.15,0.15); }
+function syncMoveButton() {
+	if (!moveButtonRef) return;
+	const active = moveMode.isActive();
+	moveButtonRef.Text = active ? "Exit Move" : "Move";
+	moveButtonRef.BackgroundColor3 = active ? new Color3(0.4, 0.4, 0.4) : new Color3(0.15, 0.15, 0.15);
+}
 
 function exitAllModes() {
 	placementMode.cancel();
 	deleteMode.exit();
 	wiringMode.exit();
 	cutWireMode.exit();
-	syncDeleteButton(); syncWireButton(); syncCutButton(); updateIndicator();
+	moveMode.exit();
+	syncDeleteButton(); syncWireButton(); syncCutButton(); syncMoveButton(); updateIndicator();
 }
 
 function activateDelete() {
@@ -89,8 +100,18 @@ function activateCut() {
 	else { exitAllModes(); cutWireMode.enter(); }
 	syncCutButton(); updateIndicator();
 }
+function activateMove() {
+	if (moveMode.isActive()) {
+		moveMode.exit();
+	} else {
+		exitAllModes();
+		moveMode.enter();
+	}
+	syncMoveButton();
+	updateIndicator();
+}
 function startPlacing(component: Model) {
-	if (deleteMode.isActive() || wiringMode.isActive() || cutWireMode.isActive()) return;
+	if (deleteMode.isActive() || wiringMode.isActive() || cutWireMode.isActive() || moveMode.isActive()) return;
 	placementMode.start(component);
 	updateIndicator();
 }
@@ -112,6 +133,12 @@ function initUI() {
 		cutWireButtonRef = cutBtn;
 		cutWireButtonRef.MouseButton1Click.Connect(() => activateCut()); syncCutButton();
 	}
+	const moveButton = ComponentUI.FindFirstChild("Move");
+	if (moveButton && moveButton.IsA("TextButton")) {
+		moveButtonRef = moveButton;
+		moveButton.MouseButton1Click.Connect(() => activateMove());
+		syncMoveButton();
+	}
 	let existing = ComponentUI.FindFirstChild("ModeIndicator");
 	if (existing && existing.IsA("TextLabel")) modeIndicator = existing; else {
 		const label = new Instance("TextLabel"); label.Name = "ModeIndicator"; label.Size = new UDim2(1,0,0,24); label.Position = new UDim2(0,0,0,-24); label.BackgroundTransparency = 1; label.TextScaled = true; label.TextColor3 = new Color3(1,0.2,0.2); label.Visible = false; label.Parent = ComponentUI; modeIndicator = label;
@@ -129,11 +156,12 @@ mouse.Button1Down.Connect(() => {
 	if (deleteMode.isActive()) { deleteMode.onClick(mouse, cam); return; }
 	if (cutWireMode.isActive()) { cutWireMode.onClick(mouse, cam); return; }
 	if (wiringMode.isActive()) { wiringMode.onClick(mouse, cam); return; }
+	if (moveMode.isActive()) { moveMode.onClick(mouse, cam); return; }
 	if (placementMode.isActive()) { confirmPlacement(); return; }
 });
 UserInputService.InputBegan.Connect((input) => {
 	if (input.KeyCode === Enum.KeyCode.Q) {
-		if (deleteMode.isActive() || wiringMode.isActive()) exitAllModes(); else placementMode.cancel();
+		if (deleteMode.isActive() || wiringMode.isActive() || moveMode.isActive()) exitAllModes(); else placementMode.cancel();
 		updateIndicator(); syncDeleteButton(); syncWireButton();
 	}
 	if (input.KeyCode === Enum.KeyCode.Escape) { exitAllModes(); }
