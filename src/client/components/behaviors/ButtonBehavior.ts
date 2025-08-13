@@ -40,6 +40,6 @@ export function wireButton(model: Model) {
 	clickDetector.MouseClick.Connect(() => {
 		active = !active;
 		apply();
-		// print(` DEBUG toggled ${model.Name} -> ${active}`);
+		// print(` DEBUG activated ${model.Name} -> ${active}`);
 	});
 }
