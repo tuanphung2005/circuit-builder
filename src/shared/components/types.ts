@@ -3,6 +3,7 @@ export enum ComponentKind {
 	Light = "Light",
 	And = "And",
 	Not = "Not",
+	Switch = "Switch",
 }
 
 export interface ComponentMetadata {

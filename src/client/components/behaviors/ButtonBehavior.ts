@@ -7,16 +7,7 @@ export function isButton(model: Model) {
 
 export function wireButton(model: Model) {
 	if (!isButton(model)) return;
-	let clickDetector = model.FindFirstChildWhichIsA("ClickDetector", true);
-	if (!clickDetector) {
-		// create one on primary part if missing
-		const primary = model.PrimaryPart || (model.FindFirstChildWhichIsA("BasePart") as BasePart | undefined);
-		if (primary) {
-			clickDetector = new Instance("ClickDetector");
-			clickDetector.Parent = primary;
-		}
-	}
-	if (!clickDetector) return;
+	let clickDetector = model.FindFirstChildWhichIsA("ClickDetector", true) as ClickDetector;
 
 	let hl = model.FindFirstChild("Highlight");
 	if (!hl || !hl.IsA("Highlight")) {

@@ -13,7 +13,7 @@ export class WireService {
 	private connectionsByInputPart = new Map<BasePart, ConnectionRecord[]>();
 	private inputPartPowered = new Map<BasePart, boolean>();
 	private connections = new Map<string, ConnectionRecord>();
-	private idCounter = 1000; // fallback id allocator if binder missed
+	private idCounter = 1000;
 	private readonly ACTIVE_WIDTH = 0.2;
 	private readonly INACTIVE_WIDTH = 0.1;
 
@@ -143,26 +143,6 @@ export class WireService {
 	private setInputPartPowered(part: BasePart, powered: boolean) { this.inputPartPowered.set(part, powered); }
 
 	private evaluateModel(model: Model) {
-		// const nameLower = model.Name.lower();
-		// const inputParts = model.GetChildren().filter(c => c.IsA("BasePart") && (c.Name === "In" || c.Name.sub(1,2) === "In")) as BasePart[];
-		// if (inputParts.size() === 0) return; // no inputs => treat as source handled elsewhere
-		// let powered: boolean;
-		// // and gate
-		// if (nameLower === "and") {
-		// 	powered = inputParts.every(p => this.inputPartPowered.get(p) === true);
-		// } else {
-		// 	powered = inputParts.some(p => this.inputPartPowered.get(p) === true);
-		// }
-		// // previous state transfer
-		// const prev = model.GetAttribute("Powered");
-		// if (prev !== powered) {
-		// 	model.SetAttribute("Powered", powered);
-		// }
-		// // not gate
-		// let outputPowered = powered;
-		// if (nameLower === "not") {
-		// 	outputPowered = !powered;
-		// }
 		const isInputPowered = (part: BasePart) => this.inputPartPowered.get(part) === true;
 		const outputPowered = getComponentOutput(model, isInputPowered);
 		this.notifyOutputChanged(model, outputPowered);
