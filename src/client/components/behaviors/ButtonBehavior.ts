@@ -26,6 +26,7 @@ export function wireButton(model: Model) {
 	}
 	const highlight = hl as Highlight;
 	let active = false;
+
 	const apply = () => {
 		highlight.OutlineTransparency = active ? 0 : 1;
 		highlight.FillTransparency = active ? 0.5 : 1;
@@ -36,13 +37,21 @@ export function wireButton(model: Model) {
 		}
 		wireService.notifyOutputChanged(model, active);
 	};
+
 	apply();
+
 	clickDetector.MouseClick.Connect(() => {
-		active = !active;
+		if (clickDetector.MaxActivationDistance === 0) return;
+
+		active = true;
+		const originalDistance = clickDetector.MaxActivationDistance;
+		clickDetector.MaxActivationDistance = 0;
 		apply();
-		let baseDist = clickDetector.MaxActivationDistance;
-		clickDetector.MaxActivationDistance = active ? baseDist : 0;
-		// print(` DEBUG activated ${model.Name} -> ${active}`);
-		task.wait(1);
+
+		task.delay(1, () => {
+			active = false;
+			apply();
+			clickDetector.MaxActivationDistance = originalDistance;
+		});
 	});
 }
