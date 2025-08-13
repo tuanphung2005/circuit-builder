@@ -1,7 +1,7 @@
 import { ComponentRepository } from "client/services/ComponentRepository";
 import { PreviewService } from "client/components/placement/PreviewService";
 import { ComponentBinder } from "client/components/ComponentBinder";
-import { wireService } from "client/services/WireService"; // ensure imported for side effects
+import { wireService } from "client/services/WireService";
 import { PlacementMode } from "client/controllers/modes/PlacementMode";
 import { DeleteMode } from "client/controllers/modes/DeleteMode";
 import { WiringMode } from "client/controllers/modes/WiringMode";
