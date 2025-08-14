@@ -81,6 +81,7 @@ export class WiringMode {
 		beam.Color = new ColorSequence(new Color3(0,1,1));
 		beam.Parent = this.wiresFolder;
 		beam.Name = key;
+		beam.FaceCamera = true;
 		wireService.addConnection(outPart, inPart, beam);
 	}
 
