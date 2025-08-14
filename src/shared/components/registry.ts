@@ -25,7 +25,32 @@ export const ComponentRegistry: Record<string, ComponentMetadata> = {
 		kind: ComponentKind.Switch,
 		displayName: "Switch",
 		description: "A simple switch component that toggles power.",
-	}
+	},
+	Or: {
+		kind: ComponentKind.Or,
+		displayName: "Or",
+		description: "Outputs power when any input is powered.",
+	},
+	Xor: {
+		kind: ComponentKind.Xor,
+		displayName: "Xor",
+		description: "Outputs power only when an odd number of inputs are powered.",
+	},
+	Nand: {
+		kind: ComponentKind.Nand,
+		displayName: "Nand",
+		description: "Outputs power only when not all inputs are powered.",
+	},
+	Nor: {
+		kind: ComponentKind.Nor,
+		displayName: "Nor",
+		description: "Outputs power only when no inputs are powered.",
+	},
+	Xnor: {
+		kind: ComponentKind.Xnor,
+		displayName: "Xnor",
+		description: "Outputs power only when an even number of inputs are powered.",
+	},
 };
 
 export function getComponentMetadata(name: string): ComponentMetadata | undefined {

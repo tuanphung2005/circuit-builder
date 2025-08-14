@@ -1,4 +1,5 @@
 import { wireService } from "client/services/WireService";
+import { EndpointHighlighter } from "client/services/EndpointHighlighter";
 
 interface WireHighlights {
 	hover?: Highlight;
@@ -13,20 +14,22 @@ export class WiringMode {
 	private startPart?: BasePart;
 	private existingKeys = new Set<string>();
 	private wiresFolder: Folder;
+	private endpointHighlighter: EndpointHighlighter;
 
 	private previewBeam?: Beam;
-	private previewAttachment?: Attachment; // at mouse position (world proxy)
-	private previewPart?: Part; // invisible part to host attachment
+	private previewAttachment?: Attachment;
+	private previewPart?: Part;
 
 	constructor(componentRoot: Folder, uiParent: Instance) {
 		this.componentRoot = componentRoot;
 		this.uiParent = uiParent;
+		this.endpointHighlighter = new EndpointHighlighter(componentRoot, uiParent);
 		let folder = game.GetService("Workspace").FindFirstChild("Wires") as Folder | undefined;
 		if (!folder) { folder = new Instance("Folder"); folder.Name = "Wires"; folder.Parent = game.GetService("Workspace"); }
 		this.wiresFolder = folder;
 	}
-	enter() { if (this.active) return; this.active = true; this.clear(); }
-	exit() { if (!this.active) return; this.active = false; this.clear(); this.cleanupPreviewBeam(); }
+	enter() { if (this.active) return; this.active = true; this.clear(); this.endpointHighlighter.showAll(); }
+	exit() { if (!this.active) return; this.active = false; this.clear(); this.cleanupPreviewBeam(); this.endpointHighlighter.hideAll(); }
 	isActive() { return this.active; }
 	invalidateCache(keys: string[]) { for (const k of keys) this.existingKeys.delete(k); }
 
@@ -55,13 +58,13 @@ export class WiringMode {
 	}
 	private ensureAttachment(part: BasePart): Attachment { let a = part.FindFirstChild("WireAttachment") as Attachment; if (!a) { a = new Instance("Attachment"); a.Name = "WireAttachment"; a.Parent = part; } return a; }
 	private createWire(outPart: BasePart, inPart: BasePart) {
-		// Use the same key format as WireService (ComponentId-based) so identical component names don't collide.
+		
 		const outModel = outPart.FindFirstAncestorOfClass("Model");
 		const inModel = inPart.FindFirstAncestorOfClass("Model");
 		if (!outModel || !inModel || outModel === inModel) return;
 		let outId = outModel.GetAttribute("ComponentId") as number | undefined;
 		let inId = inModel.GetAttribute("ComponentId") as number | undefined;
-		// Fallback: assign temporary ids if binder somehow missed (will also let WireService set one later)
+
 		if (outId === undefined) { outId = math.random(1, 10_000_000); outModel.SetAttribute("ComponentId", outId); }
 		if (inId === undefined) { inId = math.random(1, 10_000_000); inModel.SetAttribute("ComponentId", inId); }
 		const key = `${outId}:${outPart.Name}->${inId}:${inPart.Name}`;
@@ -78,6 +81,7 @@ export class WiringMode {
 		beam.Color = new ColorSequence(new Color3(0,1,1));
 		beam.Parent = this.wiresFolder;
 		beam.Name = key;
+		beam.FaceCamera = true;
 		wireService.addConnection(outPart, inPart, beam);
 	}
 
@@ -120,10 +124,9 @@ export class WiringMode {
 			}
 		}
 
-		// Update preview beam if we have a start but no endpoint yet
+		// preview beam
 		if (this.startPart) {
 			const startIsOut = this.isOutput(this.startPart);
-			// show preview only when expecting the second endpoint of opposite type
 			if (!endpoint || (endpoint !== this.startPart && (this.isOutput(endpoint) !== startIsOut))) {
 				this.updatePreviewBeam(camera, mouse);
 			} else {
@@ -144,7 +147,7 @@ export class WiringMode {
 		if (!this.previewBeam) {
 			const beam = new Instance("Beam"); beam.Attachment0 = attach0; beam.Attachment1 = this.previewAttachment!; beam.Width0 = 0.05; beam.Width1 = 0.05; beam.Transparency = new NumberSequence(0.2); beam.Color = new ColorSequence(new Color3(0,1,1)); beam.Parent = this.wiresFolder; this.previewBeam = beam;
 		}
-		// Position preview part at mouse hit
+
 		const pos = mouse.Hit.Position; this.previewPart!.CFrame = new CFrame(pos);
 	}
 	private cleanupPreviewBeam() {
