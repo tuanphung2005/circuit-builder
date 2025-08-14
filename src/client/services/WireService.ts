@@ -6,6 +6,7 @@ interface ConnectionRecord {
 }
 
 import { getComponentOutput } from "./ComponentLogic";
+import { calculateCurveSize } from "../utils/curve";
 
 export class WireService {
 	private outputState = new Map<Model, boolean>();
@@ -146,6 +147,36 @@ export class WireService {
 		const isInputPowered = (part: BasePart) => this.inputPartPowered.get(part) === true;
 		const outputPowered = getComponentOutput(model, isInputPowered);
 		this.notifyOutputChanged(model, outputPowered);
+	}
+
+	// beam curve TODO: REFACTOR THIS
+	updateConnectionsForComponent(model: Model) {
+		const connectionsToUpdate: ConnectionRecord[] = [];
+		const outConnections = this.connectionsByOutput.get(model);
+		if (outConnections) {
+			for (const conn of outConnections) {
+				connectionsToUpdate.push(conn);
+			}
+		}
+		for (const [_, conn] of this.connections) {
+			const inModel = conn.inputPart.FindFirstAncestorOfClass("Model");
+			if (inModel === model) {
+				if (!connectionsToUpdate.includes(conn)) {
+					connectionsToUpdate.push(conn);
+				}
+			}
+		}
+
+		for (const conn of connectionsToUpdate) {
+			const a0 = conn.outputPart.FindFirstChild("WireAttachment") as Attachment | undefined;
+			const a1 = conn.inputPart.FindFirstChild("WireAttachment") as Attachment | undefined;
+
+			if (a0 && a1 && conn.beam) {
+				const [curve0, curve1] = calculateCurveSize(a0.WorldCFrame, a1.WorldCFrame);
+				conn.beam.CurveSize0 = curve0;
+				conn.beam.CurveSize1 = curve1;
+			}
+		}
 	}
 }
 

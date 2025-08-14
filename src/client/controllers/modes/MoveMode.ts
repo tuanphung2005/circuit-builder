@@ -64,6 +64,7 @@ export class MoveMode {
             this.previewService.stopUpdating();
             this.previewService.solidify(this.movingComponent);
             this.movingComponent.Parent = this.componentRoot;
+            wireService.updateConnectionsForComponent(this.movingComponent);
             this.movingComponent = undefined;
         }
     }

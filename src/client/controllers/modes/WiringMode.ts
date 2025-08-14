@@ -1,5 +1,6 @@
 import { wireService } from "client/services/WireService";
 import { EndpointHighlighter } from "client/services/EndpointHighlighter";
+import { calculateCurveSize } from "client/utils/curve";
 
 interface WireHighlights {
 	hover?: Highlight;
@@ -58,7 +59,7 @@ export class WiringMode {
 	}
 	private ensureAttachment(part: BasePart): Attachment { let a = part.FindFirstChild("WireAttachment") as Attachment; if (!a) { a = new Instance("Attachment"); a.Name = "WireAttachment"; a.Parent = part; } return a; }
 	private createWire(outPart: BasePart, inPart: BasePart) {
-		
+	
 		const outModel = outPart.FindFirstAncestorOfClass("Model");
 		const inModel = inPart.FindFirstAncestorOfClass("Model");
 		if (!outModel || !inModel || outModel === inModel) return;
@@ -79,9 +80,15 @@ export class WiringMode {
 		beam.Attachment0 = a0; beam.Attachment1 = a1;
 		beam.Width0 = 0.1; beam.Width1 = 0.1;
 		beam.Color = new ColorSequence(new Color3(0,1,1));
+
+		const [curve0, curve1] = calculateCurveSize(a0.WorldCFrame, a1.WorldCFrame);
+		beam.CurveSize0 = curve0;
+		beam.CurveSize1 = curve1;
+
+		beam.FaceCamera = true;
+
 		beam.Parent = this.wiresFolder;
 		beam.Name = key;
-		beam.FaceCamera = true;
 		wireService.addConnection(outPart, inPart, beam);
 	}
 
@@ -148,7 +155,15 @@ export class WiringMode {
 			const beam = new Instance("Beam"); beam.Attachment0 = attach0; beam.Attachment1 = this.previewAttachment!; beam.Width0 = 0.05; beam.Width1 = 0.05; beam.Transparency = new NumberSequence(0.2); beam.Color = new ColorSequence(new Color3(0,1,1)); beam.Parent = this.wiresFolder; this.previewBeam = beam;
 		}
 
-		const pos = mouse.Hit.Position; this.previewPart!.CFrame = new CFrame(pos);
+		const pos = mouse.Hit.Position;
+		this.previewPart!.CFrame = new CFrame(pos);
+
+		// update
+		if (this.previewBeam) {
+			const [curve0, curve1] = calculateCurveSize(attach0.WorldCFrame, this.previewPart.CFrame);
+			this.previewBeam.CurveSize0 = curve0;
+			this.previewBeam.CurveSize1 = curve1;
+		}
 	}
 	private cleanupPreviewBeam() {
 		if (this.previewBeam) { this.previewBeam.Destroy(); this.previewBeam = undefined; }
