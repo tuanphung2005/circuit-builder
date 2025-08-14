@@ -7,16 +7,7 @@ export function isButton(model: Model) {
 
 export function wireButton(model: Model) {
 	if (!isButton(model)) return;
-	let clickDetector = model.FindFirstChildWhichIsA("ClickDetector", true);
-	if (!clickDetector) {
-		// create one on primary part if missing
-		const primary = model.PrimaryPart || (model.FindFirstChildWhichIsA("BasePart") as BasePart | undefined);
-		if (primary) {
-			clickDetector = new Instance("ClickDetector");
-			clickDetector.Parent = primary;
-		}
-	}
-	if (!clickDetector) return;
+	let clickDetector = model.FindFirstChildWhichIsA("ClickDetector", true) as ClickDetector;
 
 	let hl = model.FindFirstChild("Highlight");
 	if (!hl || !hl.IsA("Highlight")) {
@@ -26,6 +17,7 @@ export function wireButton(model: Model) {
 	}
 	const highlight = hl as Highlight;
 	let active = false;
+
 	const apply = () => {
 		highlight.OutlineTransparency = active ? 0 : 1;
 		highlight.FillTransparency = active ? 0.5 : 1;
@@ -36,10 +28,21 @@ export function wireButton(model: Model) {
 		}
 		wireService.notifyOutputChanged(model, active);
 	};
+
 	apply();
+
 	clickDetector.MouseClick.Connect(() => {
-		active = !active;
+		if (clickDetector.MaxActivationDistance === 0) return;
+
+		active = true;
+		const originalDistance = clickDetector.MaxActivationDistance;
+		clickDetector.MaxActivationDistance = 0;
 		apply();
-		// print(` DEBUG toggled ${model.Name} -> ${active}`);
+
+		task.delay(1, () => {
+			active = false;
+			apply();
+			clickDetector.MaxActivationDistance = originalDistance;
+		});
 	});
 }

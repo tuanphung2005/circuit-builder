@@ -5,13 +5,16 @@ interface ConnectionRecord {
 	key: string;
 }
 
+import { getComponentOutput } from "./ComponentLogic";
+import { calculateCurveSize } from "../utils/curve";
+
 export class WireService {
 	private outputState = new Map<Model, boolean>();
 	private connectionsByOutput = new Map<Model, ConnectionRecord[]>();
 	private connectionsByInputPart = new Map<BasePart, ConnectionRecord[]>();
 	private inputPartPowered = new Map<BasePart, boolean>();
 	private connections = new Map<string, ConnectionRecord>();
-	private idCounter = 1000; // fallback id allocator if binder missed
+	private idCounter = 1000;
 	private readonly ACTIVE_WIDTH = 0.2;
 	private readonly INACTIVE_WIDTH = 0.1;
 
@@ -141,15 +144,39 @@ export class WireService {
 	private setInputPartPowered(part: BasePart, powered: boolean) { this.inputPartPowered.set(part, powered); }
 
 	private evaluateModel(model: Model) {
-		const nameLower = model.Name.lower();
-		const inputParts = model.GetChildren().filter(c => c.IsA("BasePart") && (c.Name === "In" || c.Name.sub(1,2) === "In")) as BasePart[];
-		if (inputParts.size() === 0) return; // no inputs => treat as source handled elsewhere
-		let powered: boolean;
-		if (nameLower === "and") powered = inputParts.every(p => this.inputPartPowered.get(p) === true); else powered = inputParts.some(p => this.inputPartPowered.get(p) === true);
-		const prev = model.GetAttribute("Powered");
-		if (prev !== powered) model.SetAttribute("Powered", powered);
-		// Propagate this model's output state to its connected outputs (if it has an Out part wired)
-		this.notifyOutputChanged(model, powered);
+		const isInputPowered = (part: BasePart) => this.inputPartPowered.get(part) === true;
+		const outputPowered = getComponentOutput(model, isInputPowered);
+		this.notifyOutputChanged(model, outputPowered);
+	}
+
+	// beam curve TODO: REFACTOR THIS
+	updateConnectionsForComponent(model: Model) {
+		const connectionsToUpdate: ConnectionRecord[] = [];
+		const outConnections = this.connectionsByOutput.get(model);
+		if (outConnections) {
+			for (const conn of outConnections) {
+				connectionsToUpdate.push(conn);
+			}
+		}
+		for (const [_, conn] of this.connections) {
+			const inModel = conn.inputPart.FindFirstAncestorOfClass("Model");
+			if (inModel === model) {
+				if (!connectionsToUpdate.includes(conn)) {
+					connectionsToUpdate.push(conn);
+				}
+			}
+		}
+
+		for (const conn of connectionsToUpdate) {
+			const a0 = conn.outputPart.FindFirstChild("WireAttachment") as Attachment | undefined;
+			const a1 = conn.inputPart.FindFirstChild("WireAttachment") as Attachment | undefined;
+
+			if (a0 && a1 && conn.beam) {
+				const [curve0, curve1] = calculateCurveSize(a0.WorldCFrame, a1.WorldCFrame);
+				conn.beam.CurveSize0 = curve0;
+				conn.beam.CurveSize1 = curve1;
+			}
+		}
 	}
 }
 
