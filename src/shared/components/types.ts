@@ -4,6 +4,7 @@ export enum ComponentKind {
 	And = "And",
 	Not = "Not",
 	Switch = "Switch",
+	Or = "Or",
 }
 
 export interface ComponentMetadata {

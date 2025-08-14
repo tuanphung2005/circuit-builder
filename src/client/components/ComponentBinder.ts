@@ -3,6 +3,7 @@ import { wireLight, isLight } from "client/components/behaviors/LightBehavior";
 import { wireAnd, isAnd } from "client/components/behaviors/AndBehavior";
 import { wireNot, isNot } from "client/components/behaviors/NotBehavior";
 import { wireSwitch, isSwitch } from "client/components/behaviors/SwitchBehaviour";
+import { isOr, wireOr } from "./behaviors/OrBehavior";
 
 let nextComponentId = 1;
 function assignId(model: Model) {
@@ -28,6 +29,7 @@ export class ComponentBinder {
 		this.entries.push({ predicate: isAnd, wire: wireAnd });
 		this.entries.push({ predicate: isNot, wire: wireNot });
 		this.entries.push({ predicate: isSwitch, wire: wireSwitch });
+		this.entries.push({ predicate: isOr, wire: wireOr });
 	}
 
 	bind(model: Model) {

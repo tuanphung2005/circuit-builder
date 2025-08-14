@@ -25,6 +25,11 @@ export const ComponentRegistry: Record<string, ComponentMetadata> = {
 		kind: ComponentKind.Switch,
 		displayName: "Switch",
 		description: "A simple switch component that toggles power.",
+	},
+	Or: {
+		kind: ComponentKind.Or,
+		displayName: "Or",
+		description: "Outputs power when at least one input is powered.",
 	}
 };
 
