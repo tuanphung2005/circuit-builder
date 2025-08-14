@@ -8,6 +8,7 @@ import { WiringMode } from "client/controllers/modes/WiringMode";
 import { CutWireMode } from "client/controllers/modes/CutWireMode";
 import { MoveMode } from "client/controllers/modes/MoveMode";
 import { ClickDetectorManager } from "client/services/ClickDetectorManager";
+import { KeybindManager } from "client/ui/KeybindManager";
 
 const Players = game.GetService("Players");
 const ReplicatedStorage = game.GetService("ReplicatedStorage");
@@ -82,6 +83,42 @@ function syncMoveButton() {
 	const active = moveMode.isActive();
 	moveButtonRef.Text = active ? "Exit Move" : "Move";
 	moveButtonRef.BackgroundColor3 = active ? new Color3(0.4, 0.4, 0.4) : new Color3(0.15, 0.15, 0.15);
+}
+
+// for keybinds
+export class PlacementController {
+	constructor() {
+		initUI();
+		new KeybindManager(this);
+	}
+
+	activateDelete() {
+		if (deleteMode.isActive()) { deleteMode.exit(); clickDetectorManager.enableAll(); }
+		else { exitAllModes(); deleteMode.enter(); clickDetectorManager.disableAll(); }
+		syncDeleteButton(); updateIndicator();
+	}
+	activateWiring() {
+		if (wiringMode.isActive()) { wiringMode.exit(); clickDetectorManager.enableAll(); }
+		else { exitAllModes(); wiringMode.enter(); clickDetectorManager.disableAll(); }
+		syncWireButton(); updateIndicator();
+	}
+	activateCut() {
+		if (cutWireMode.isActive()) { cutWireMode.exit(); clickDetectorManager.enableAll(); }
+		else { exitAllModes(); cutWireMode.enter(); clickDetectorManager.disableAll(); }
+		syncCutButton(); updateIndicator();
+	}
+	activateMove() {
+		if (moveMode.isActive()) {
+			moveMode.exit();
+			clickDetectorManager.enableAll();
+		} else {
+			exitAllModes();
+			moveMode.enter();
+			clickDetectorManager.disableAll();
+		}
+		syncMoveButton();
+		updateIndicator();
+	}
 }
 
 function exitAllModes() {
@@ -182,7 +219,7 @@ UserInputService.InputBegan.Connect((input) => {
 	if (input.KeyCode === Enum.KeyCode.Escape) { exitAllModes(); }
 });
 
-initUI();
+new PlacementController();
 
 // Heartbeat loops
 RunService.Heartbeat.Connect(() => { const cam = Workspace.CurrentCamera; if (!cam) return; deleteMode.onHeartbeat(mouse, cam); });
