@@ -16,16 +16,17 @@ export class KeybindManager {
 
             switch (input.KeyCode) {
                 case Enum.KeyCode.One:
-                    this.controller.activateMove();
-                    break;
-                case Enum.KeyCode.Two:
+                    //
                     this.controller.activateWiring();
                     break;
+                case Enum.KeyCode.Two:
+                    this.controller.activateMove();
+                    break;
                 case Enum.KeyCode.Three:
-                    this.controller.activateCut();
+                    this.controller.activateDelete();
                     break;
                 case Enum.KeyCode.Four:
-                    this.controller.activateDelete();
+                    this.controller.activateCut();
                     break;
             }
         });

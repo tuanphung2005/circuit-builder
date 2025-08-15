@@ -20,7 +20,8 @@ const RunService = game.GetService("RunService");
 const player = Players.LocalPlayer;
 const playerGui = player.WaitForChild("PlayerGui");
 const ComponentUI = playerGui.WaitForChild("ComponentUI");
-const frame = ComponentUI.WaitForChild("Frame") as ScrollingFrame;
+const containerFrame = ComponentUI.WaitForChild("Frame") as Frame;
+const frame = containerFrame.WaitForChild("Frame") as ScrollingFrame;
 
 const componentsFolder = ReplicatedStorage.WaitForChild("Components") as Folder;
 const repo = new ComponentRepository(componentsFolder);
