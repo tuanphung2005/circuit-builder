@@ -1,9 +1,7 @@
 # CIRCUIT MAKER
 
 ## NOTE TO SELF:
-to add a component, i need to update registry, types, component logic, component binder, and component behaviour
-
-MORE NOTE: REWORK WIRESERVICE
+DO NOT PUT SCRIPTS SERVER MODULES INSIDE SHARED FOLDER AS IT WILL BE REPLICATED TO CLIENTS (BAD)
 
 ## STRUCTURE OF COMPONENT(s) (Model):
 Button { Highlight(Highlight), ClickDetector(clickdetector), Base(part), Out(part) }
