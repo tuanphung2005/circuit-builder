@@ -15,12 +15,15 @@ export class UIManager {
 		const player = game.GetService("Players").LocalPlayer;
 		const playerGui = player.WaitForChild("PlayerGui");
 		const componentUI = playerGui.WaitForChild("ComponentUI");
-		const frame = componentUI.WaitForChild("Frame") as ScrollingFrame;
+		
+		const containerFrame = componentUI.WaitForChild("Frame") as Frame;
+		const frame = containerFrame.WaitForChild("Frame") as ScrollingFrame;
 
-		this.deleteButton = componentUI.WaitForChild("Delete") as TextButton;
-		this.wireButton = componentUI.WaitForChild("Wire") as TextButton;
-		this.cutWireButton = componentUI.WaitForChild("CutWire") as TextButton;
-		this.moveButton = componentUI.WaitForChild("Move") as TextButton;
+		const buttonsContainer = componentUI.WaitForChild("Buttons") as Frame;
+		this.deleteButton = buttonsContainer.WaitForChild("Delete") as TextButton;
+		this.wireButton = buttonsContainer.WaitForChild("Wire") as TextButton;
+		this.cutWireButton = buttonsContainer.WaitForChild("CutWire") as TextButton;
+		this.moveButton = buttonsContainer.WaitForChild("Move") as TextButton;
 
 		let indicator = componentUI.FindFirstChild("ModeIndicator") as TextLabel | undefined;
 		if (!indicator) {

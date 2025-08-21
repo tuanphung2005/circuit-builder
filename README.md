@@ -4,6 +4,9 @@
 DO NOT PUT SCRIPTS SERVER MODULES INSIDE SHARED FOLDER AS IT WILL BE REPLICATED TO CLIENTS (BAD)
 
 ## STRUCTURE OF COMPONENT(s) (Model):
+
+EACH HAVE BillboardGUI for indication
+
 Button { Highlight(Highlight), ClickDetector(clickdetector), Base(part), Out(part) }
 - activate power for a certain amound of time
 

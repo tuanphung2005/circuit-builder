@@ -8,6 +8,7 @@ import { WiringMode } from "client/controllers/modes/WiringMode";
 import { CutWireMode } from "client/controllers/modes/CutWireMode";
 import { MoveMode } from "client/controllers/modes/MoveMode";
 import { ClickDetectorManager } from "client/services/ClickDetectorManager";
+import { ComponentLabelManager } from "client/services/ComponentLabelManager";
 import { KeybindManager } from "client/controllers/KeybindManager";
 import { UIManager } from "client/ui/UIManager";
 
@@ -37,6 +38,7 @@ const clickDetectorManager = new ClickDetectorManager(componentRoot);
 binder.bindDescendants(Workspace);
 
 const mouse = player.GetMouse();
+const componentLabelManager = new ComponentLabelManager(componentRoot, mouse);
 
 const placementMode = new PlacementMode(previewService, binder, componentRoot, mouse);
 const deleteMode = new DeleteMode(componentRoot, ComponentUI);
